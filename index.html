@@ -7,7 +7,7 @@
 <style>
   :root{
     --bg: #0b0f1c;
-    --bg-card: rgba(255,255,255,0.03);
+    --card-bg: rgba(255,255,255,0.03);
     --text: #e6eef6;
     --accent: #7be0ff;
     --btn-bg: rgba(255,255,255,0.05);
@@ -23,6 +23,7 @@
     flex-direction:column;
     min-height:100vh;
     padding:2rem;
+    gap:1rem;
   }
 
   h1{
@@ -32,14 +33,13 @@
 
   .container{
     display:flex;
-    flex:1;
     gap:1rem;
-    margin-bottom:1rem;
+    flex:1;
   }
 
   textarea{
     flex:1;
-    background: var(--bg-card);
+    background: var(--card-bg);
     border:none;
     border-radius:10px;
     padding:1rem;
@@ -53,7 +53,7 @@
   button{
     background: var(--btn-bg);
     border:none;
-    padding:0.7rem 1.2rem;
+    padding:0.8rem 1.5rem;
     border-radius:8px;
     color: var(--accent);
     font-weight:600;
@@ -61,6 +61,7 @@
     transition:0.2s;
     font-size:1rem;
     align-self:center;
+    margin-top:0.5rem;
   }
   button:hover{
     background: var(--btn-hover);
@@ -79,25 +80,29 @@
 <h1>Humaniser</h1>
 
 <div class="container">
-  <textarea id="inputText" placeholder="Paste content to humanise..."></textarea>
+  <div style="display:flex; flex-direction:column; flex:1;">
+    <textarea id="inputText" placeholder="Paste content to humanise..."></textarea>
+    <button id="humaniseBtn">Humanise</button>
+  </div>
   <textarea id="outputText" placeholder="Output will appear here..." readonly></textarea>
 </div>
 
-<button id="humaniseBtn">Humanise</button>
-
 <script>
+  // Humaniser logic function
   function humanise(text){
-    // simple humanising example: capitalize first letter of each sentence and trim extra spaces
-    return text
-      .split(/([.!?])/)
-      .map(s => s.trim())
-      .filter(s => s.length > 0)
-      .map(s => s[0] ? s[0].toUpperCase() + s.slice(1) : '')
-      .join('. ')
-      .replace(/\s+/g,' ')
-      .trim();
+    if(!text) return '';
+    // Step 1: normalize spaces
+    let t = text.replace(/\s+/g, ' ').trim();
+    // Step 2: capitalize first letter of each sentence
+    t = t.replace(/([.!?]\s*|^)([a-z])/g, (match, p1, p2) => p1 + p2.toUpperCase());
+    // Step 3: optional: replace some robotic phrases (example)
+    t = t.replace(/\butilize\b/gi, 'use')
+         .replace(/\bassist\b/gi, 'help')
+         .replace(/\bapproximately\b/gi, 'about');
+    return t;
   }
 
+  // Button click event
   document.getElementById('humaniseBtn').addEventListener('click', () => {
     const input = document.getElementById('inputText').value;
     const output = humanise(input);
