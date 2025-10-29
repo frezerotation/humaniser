@@ -2,257 +2,108 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Humaniser — Floating in Space</title>
-<meta name="description" content="Minimal dark single-page site with a floating-in-space vibe. Lightweight and friendly to low-RAM devices." />
-
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Humaniser</title>
 <style>
   :root{
-    --bg-1: #05060a;
-    --bg-2: #071428;
+    --bg: #0b0f1c;
+    --bg-card: rgba(255,255,255,0.03);
+    --text: #e6eef6;
     --accent: #7be0ff;
-    --muted: #98a0b3;
-    --glass: rgba(255,255,255,0.04);
-    --card: rgba(255,255,255,0.03);
+    --btn-bg: rgba(255,255,255,0.05);
+    --btn-hover: rgba(255,255,255,0.1);
   }
 
-  /* Reset-ish, minimal */
-  *{box-sizing:border-box}
-  html,body{height:100%}
   body{
     margin:0;
-    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    background: radial-gradient(1200px 600px at 10% 10%, rgba(11,22,40,0.6), transparent 7%),
-                radial-gradient(900px 400px at 90% 80%, rgba(5,10,20,0.6), transparent 8%),
-                linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
-    color: #e6eef6;
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-    overflow:hidden;
-  }
-
-  /* Container centers content and constrains width */
-  .stage{
-    position:relative;
-    min-height:100vh;
-    display:grid;
-    place-items:center;
-    padding:3rem 1.25rem;
-  }
-
-  /* Lightweight starfield: a single repeating radial-gradient layer */
-  .stars,
-  .stars::after{
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-    z-index:0;
-    background-image:
-      radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.85), transparent 30%),
-      radial-gradient(1px 1px at 30% 70%, rgba(255,255,255,0.6), transparent 30%),
-      radial-gradient(1px 1px at 60% 40%, rgba(255,255,255,0.5), transparent 30%),
-      radial-gradient(1px 1px at 80% 15%, rgba(255,255,255,0.65), transparent 30%);
-    background-repeat:repeat;
-    background-size: 200px 200px;
-    opacity:0.9;
-    transform: translateZ(0);
-  }
-  /* faint slow movement for depth; very cheap */
-  @media (prefers-reduced-motion: no-preference){
-    .stars{
-      animation: drift 30s linear infinite;
-    }
-    .stars::after{
-      content:"";
-      background-image:
-        radial-gradient(0.8px 0.8px at 40% 30%, rgba(255,255,255,0.25), transparent 30%),
-        radial-gradient(0.8px 0.8px at 70% 80%, rgba(255,255,255,0.2), transparent 30%);
-      background-size: 300px 300px;
-      opacity:0.6;
-      animation: drift 45s linear infinite reverse;
-    }
-  }
-  @keyframes drift{
-    from{ transform: translateY(0) }
-    to  { transform: translateY(-40px) }
-  }
-
-  /* Main card with subtle glassy look */
-  .card{
-    position:relative;
-    z-index:2;
-    width:min(920px, 96%);
-    max-width:920px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border-radius:18px;
-    padding:2rem;
-    display:grid;
-    grid-template-columns: 1fr 320px;
-    gap:1.5rem;
-    align-items:center;
-    box-shadow: 0 6px 30px rgba(2,6,12,0.6);
-    border: 1px solid rgba(255,255,255,0.03);
-    backdrop-filter: blur(6px);
-  }
-
-  /* Left column: headline and text */
-  .hero{
-    padding-right:0.5rem;
-  }
-  h1{
-    margin:0 0 0.4rem 0;
-    font-weight:600;
-    letter-spacing:-0.02em;
-    font-size:clamp(1.4rem, 2.6vw, 2rem);
-    color: #e9f8ff;
-  }
-  p.lead{
-    margin:0 0 1.25rem 0;
-    color:var(--muted);
-    line-height:1.45;
-    font-size:1rem;
-  }
-
-  /* Simple control row */
-  .controls{
+    font-family: system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
     display:flex;
-    gap:0.6rem;
-    align-items:center;
+    flex-direction:column;
+    min-height:100vh;
+    padding:2rem;
   }
-  .btn{
-    background:var(--glass);
-    border:1px solid rgba(255,255,255,0.04);
-    color:inherit;
-    padding:0.55rem 0.9rem;
+
+  h1{
+    text-align:center;
+    margin-bottom:1rem;
+  }
+
+  .container{
+    display:flex;
+    flex:1;
+    gap:1rem;
+    margin-bottom:1rem;
+  }
+
+  textarea{
+    flex:1;
+    background: var(--bg-card);
+    border:none;
     border-radius:10px;
+    padding:1rem;
+    color: var(--text);
+    font-size:1rem;
+    resize:none;
+    min-height:300px;
+    font-family: inherit;
+  }
+
+  button{
+    background: var(--btn-bg);
+    border:none;
+    padding:0.7rem 1.2rem;
+    border-radius:8px;
+    color: var(--accent);
     font-weight:600;
     cursor:pointer;
-    text-decoration:none;
-    font-size:0.95rem;
+    transition:0.2s;
+    font-size:1rem;
+    align-self:center;
   }
-  .btn.ghost{
-    background:transparent;
-    border:1px solid rgba(255,255,255,0.06);
-    color:var(--muted);
-  }
-
-  /* Right column: floating planet/art */
-  .canvas{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    height:220px;
-    position:relative;
+  button:hover{
+    background: var(--btn-hover);
   }
 
-  /* planet — pure CSS (cheap) */
-  .planet{
-    width:160px;
-    height:160px;
-    border-radius:50%;
-    background: radial-gradient(circle at 30% 25%, #91f3ff 0%, #4fb8e8 20%, #203b5a 60%, #0b1b2b 100%);
-    box-shadow:
-      inset -12px -8px 30px rgba(0,0,0,0.45),
-      0 18px 60px rgba(3,8,16,0.6);
-    position:relative;
-    transform: translateZ(0);
-    overflow:hidden;
-  }
-
-  /* thin ring */
-  .planet::before{
-    content:"";
-    position:absolute;
-    width:260px;
-    height:26px;
-    left:50%;
-    top:46%;
-    transform:translate(-50%, -50%) rotate(-18deg);
-    border-radius:50%;
-    border:2px solid rgba(255,255,255,0.06);
-    background: linear-gradient(90deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));
-    filter: blur(0.6px);
-  }
-
-  /* subtle float animation */
-  @media (prefers-reduced-motion: no-preference){
-    .planet{
-      animation: floaty 6.8s ease-in-out infinite;
+  /* Responsive for small screens */
+  @media(max-width:720px){
+    .container{
+      flex-direction:column;
     }
-    @keyframes floaty{
-      0%{ transform: translateY(0) rotate(0.001deg) }
-      50%{ transform: translateY(-8px) rotate(0.001deg) }
-      100%{ transform: translateY(0) rotate(0.001deg) }
-    }
-  }
-
-  /* small orbiting moon (very cheap) */
-  .moon{
-    position:absolute;
-    width:28px;
-    height:28px;
-    border-radius:50%;
-    right:-10px;
-    top:-10px;
-    background: linear-gradient(180deg,#cfeefb,#9bd4f0);
-    box-shadow: 0 6px 18px rgba(3,8,16,0.5);
-    transform-origin: -70px 70px;
-    transform: rotate(0deg);
-  }
-  @media (prefers-reduced-motion: no-preference){
-    .moon{ animation: orbit 9.6s linear infinite; }
-    @keyframes orbit{
-      from{ transform: rotate(0deg) translate(0) }
-      to{ transform: rotate(360deg) translate(0) }
-    }
-  }
-
-  /* footer note */
-  .meta{
-    grid-column: 1 / -1;
-    margin-top:0.6rem;
-    color:var(--muted);
-    font-size:0.9rem;
-    display:flex;
-    justify-content:space-between;
-    gap:1rem;
-    align-items:center;
-  }
-
-  /* Responsive: stack columns on small screens */
-  @media (max-width:720px){
-    .card{ grid-template-columns: 1fr; padding:1.25rem; gap:1rem; }
-    .canvas{ height:160px; }
-    .planet{ width:120px; height:120px; }
   }
 </style>
 </head>
 <body>
-  <div class="stage" role="main">
-    <div class="stars" aria-hidden="true"></div>
 
-    <article class="card" aria-labelledby="title">
-      <div class="hero">
-        <h1 id="title">humaniser</h1>
-        <p class="lead">A lightweight, dark, floating-in-space UI. Minimal code, gentle animations, and optimized for low-RAM devices.</p>
+<h1>Humaniser</h1>
 
-        <div class="controls" role="navigation" aria-label="Primary">
-          <a class="btn" href="#" onclick="event.preventDefault()">Explore</a>
-          <a class="btn ghost" href="#" onclick="event.preventDefault()">Docs</a>
-        </div>
-      </div>
+<div class="container">
+  <textarea id="inputText" placeholder="Paste content to humanise..."></textarea>
+  <textarea id="outputText" placeholder="Output will appear here..." readonly></textarea>
+</div>
 
-      <div class="canvas" aria-hidden="false">
-        <div class="planet" role="img" aria-label="Stylized planet">
-          <div class="moon" aria-hidden="true"></div>
-        </div>
-      </div>
+<button id="humaniseBtn">Humanise</button>
 
-      <div class="meta">
-        <span>Dark • Minimal • Responsive</span>
-        <span style="opacity:0.8">No JS • Prefers-reduced-motion supported</span>
-      </div>
-    </article>
-  </div>
+<script>
+  function humanise(text){
+    // simple humanising example: capitalize first letter of each sentence and trim extra spaces
+    return text
+      .split(/([.!?])/)
+      .map(s => s.trim())
+      .filter(s => s.length > 0)
+      .map(s => s[0] ? s[0].toUpperCase() + s.slice(1) : '')
+      .join('. ')
+      .replace(/\s+/g,' ')
+      .trim();
+  }
+
+  document.getElementById('humaniseBtn').addEventListener('click', () => {
+    const input = document.getElementById('inputText').value;
+    const output = humanise(input);
+    document.getElementById('outputText').value = output;
+  });
+</script>
+
 </body>
 </html>
