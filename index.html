@@ -38,7 +38,6 @@
   }
 
   textarea{
-    flex:1;
     background: var(--card-bg);
     border:none;
     border-radius:10px;
@@ -46,31 +45,57 @@
     color: var(--text);
     font-size:1rem;
     resize:none;
-    min-height:300px;
     font-family: inherit;
+  }
+
+  #inputText{
+    flex:0.6; /* input smaller */
+    min-height:200px;
+  }
+  #outputText{
+    flex:1.4; /* output bigger */
+    min-height:400px;
   }
 
   button{
     background: var(--btn-bg);
     border:none;
-    padding:0.8rem 1.5rem;
+    padding:0.7rem 1.5rem;
     border-radius:8px;
     color: var(--accent);
     font-weight:600;
     cursor:pointer;
     transition:0.2s;
     font-size:1rem;
-    align-self:center;
     margin-top:0.5rem;
+    align-self:flex-start;
   }
   button:hover{
     background: var(--btn-hover);
   }
 
-  /* Responsive for small screens */
+  .options{
+    display:flex;
+    align-items:center;
+    gap:0.5rem;
+    margin-top:0.5rem;
+  }
+
+  .options label{
+    font-size:0.9rem;
+    color: var(--text);
+  }
+
+  input[type=range]{
+    flex:1;
+  }
+
   @media(max-width:720px){
     .container{
       flex-direction:column;
+    }
+    #inputText, #outputText{
+      flex:1;
     }
   }
 </style>
@@ -80,32 +105,62 @@
 <h1>Humaniser</h1>
 
 <div class="container">
-  <div style="display:flex; flex-direction:column; flex:1;">
+  <div style="display:flex; flex-direction:column; flex:0.6;">
     <textarea id="inputText" placeholder="Paste content to humanise..."></textarea>
     <button id="humaniseBtn">Humanise</button>
   </div>
-  <textarea id="outputText" placeholder="Output will appear here..." readonly></textarea>
+  <div style="display:flex; flex-direction:column; flex:1.4;">
+    <textarea id="outputText" placeholder="Output will appear here..." readonly></textarea>
+    <div class="options">
+      <label for="mistakeSlider">Add mistakes:</label>
+      <input type="range" id="mistakeSlider" min="0" max="2" step="1" value="0">
+      <span id="mistakeValue">0</span>
+    </div>
+  </div>
 </div>
 
 <script>
-  // Humaniser logic function
-  function humanise(text){
+  function humanise(text, mistakes){
     if(!text) return '';
-    // Step 1: normalize spaces
+    // Normalize spaces
     let t = text.replace(/\s+/g, ' ').trim();
-    // Step 2: capitalize first letter of each sentence
+    // Capitalize sentences
     t = t.replace(/([.!?]\s*|^)([a-z])/g, (match, p1, p2) => p1 + p2.toUpperCase());
-    // Step 3: optional: replace some robotic phrases (example)
+    // Replace some robotic phrases
     t = t.replace(/\butilize\b/gi, 'use')
          .replace(/\bassist\b/gi, 'help')
          .replace(/\bapproximately\b/gi, 'about');
+
+    // Add small number of mistakes if requested
+    if(mistakes > 0){
+      const words = t.split(' ');
+      for(let i=0; i<Math.min(mistakes, words.length); i++){
+        const idx = Math.floor(Math.random()*words.length);
+        let w = words[idx];
+        if(w.length>1){
+          const pos = Math.floor(Math.random()*w.length);
+          // swap two letters
+          let arr = w.split('');
+          [arr[pos], arr[(pos+1)%w.length]] = [arr[(pos+1)%w.length], arr[pos]];
+          words[idx] = arr.join('');
+        }
+      }
+      t = words.join(' ');
+    }
+
     return t;
   }
 
-  // Button click event
+  const slider = document.getElementById('mistakeSlider');
+  const mistakeValue = document.getElementById('mistakeValue');
+  slider.addEventListener('input', ()=>{
+    mistakeValue.textContent = slider.value;
+  });
+
   document.getElementById('humaniseBtn').addEventListener('click', () => {
     const input = document.getElementById('inputText').value;
-    const output = humanise(input);
+    const mistakes = parseInt(slider.value);
+    const output = humanise(input, mistakes);
     document.getElementById('outputText').value = output;
   });
 </script>
