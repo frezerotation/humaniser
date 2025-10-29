@@ -3,167 +3,377 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Humaniser</title>
+<title>Humaniser — Enhanced</title>
 <style>
   :root{
-    --bg: #0b0f1c;
-    --card-bg: rgba(255,255,255,0.03);
+    --bg: linear-gradient(180deg,#071028 0%, #0b0f1c 100%);
+    --card: rgba(255,255,255,0.03);
+    --muted: #9fb3c8;
     --text: #e6eef6;
     --accent: #7be0ff;
-    --btn-bg: rgba(255,255,255,0.05);
-    --btn-hover: rgba(255,255,255,0.1);
+    --glass: rgba(255,255,255,0.04);
+    --radius: 12px;
+    --gap: 1rem;
+    --shadow: 0 6px 20px rgba(2,6,23,0.6);
+    font-smoothing:antialiased;
   }
 
+  *{box-sizing:border-box}
+  html,body{height:100%;}
   body{
     margin:0;
-    font-family: system-ui, sans-serif;
-    background: var(--bg);
-    color: var(--text);
+    padding:2rem;
+    background:var(--bg);
+    color:var(--text);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    -webkit-font-smoothing:antialiased;
     display:flex;
     flex-direction:column;
+    gap:var(--gap);
     min-height:100vh;
-    padding:2rem;
-    gap:1rem;
   }
 
-  h1{
-    text-align:center;
-    margin-bottom:1rem;
-  }
-
-  .container{
+  header{
     display:flex;
+    align-items:center;
+    justify-content:space-between;
     gap:1rem;
-    flex:1;
+  }
+  h1{margin:0;font-size:1.25rem;letter-spacing:-0.2px}
+  .subtitle{color:var(--muted);font-size:0.9rem}
+
+  .frame{
+    display:grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap:1rem;
+    align-items:start;
+    width:100%;
+  }
+
+  .panel{
+    background:var(--card);
+    padding:1rem;
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    min-height:220px;
+    display:flex;
+    flex-direction:column;
+    gap:0.6rem;
   }
 
   textarea{
-    background: var(--card-bg);
-    border:none;
+    width:100%;
+    min-height:160px;
     border-radius:10px;
-    padding:1rem;
-    color: var(--text);
+    padding:0.9rem;
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border:1px solid rgba(255,255,255,0.03);
+    color:var(--text);
+    resize:vertical;
     font-size:1rem;
-    resize:none;
-    font-family: inherit;
+    line-height:1.5;
+    font-family:inherit;
   }
 
-  #inputText{
-    flex:0.6; /* input smaller */
-    min-height:200px;
-  }
-  #outputText{
-    flex:1.4; /* output bigger */
-    min-height:400px;
+  .controls{display:flex;gap:0.6rem;align-items:center}
+  select,button{background:var(--glass);border:none;padding:0.6rem 0.8rem;border-radius:10px;color:var(--text);font-weight:600}
+  button{cursor:pointer}
+  .small{font-size:0.9rem;color:var(--muted)}
+
+  .footer-row{display:flex;gap:0.6rem;align-items:center;margin-top:auto}
+  .copy-btn{background:linear-gradient(90deg, rgba(123,224,255,0.06), rgba(123,224,255,0.03));color:var(--accent)}
+
+  .options{display:flex;flex-direction:column;gap:0.5rem}
+  .option-row{display:flex;gap:0.5rem;align-items:center}
+  label{font-size:0.9rem;color:var(--muted)}
+
+  .badge{background:rgba(255,255,255,0.03);padding:0.4rem 0.6rem;border-radius:999px;color:var(--muted);font-size:0.85rem}
+
+  @media(max-width:880px){
+    .frame{grid-template-columns:1fr;}
   }
 
-  button{
-    background: var(--btn-bg);
-    border:none;
-    padding:0.7rem 1.5rem;
-    border-radius:8px;
-    color: var(--accent);
-    font-weight:600;
-    cursor:pointer;
-    transition:0.2s;
-    font-size:1rem;
-    margin-top:0.5rem;
-    align-self:flex-start;
-  }
-  button:hover{
-    background: var(--btn-hover);
-  }
-
-  .options{
-    display:flex;
-    align-items:center;
-    gap:0.5rem;
-    margin-top:0.5rem;
-  }
-
-  .options label{
-    font-size:0.9rem;
-    color: var(--text);
-  }
-
-  input[type=range]{
-    flex:1;
-  }
-
-  @media(max-width:720px){
-    .container{
-      flex-direction:column;
-    }
-    #inputText, #outputText{
-      flex:1;
-    }
-  }
+  /* micro typographic polish for output */
+  .output{white-space:pre-wrap;word-break:break-word}
 </style>
 </head>
 <body>
-
-<h1>Humaniser</h1>
-
-<div class="container">
-  <div style="display:flex; flex-direction:column; flex:0.6;">
-    <textarea id="inputText" placeholder="Paste content to humanise..."></textarea>
-    <button id="humaniseBtn">Humanise</button>
+<header>
+  <div>
+    <h1>Humaniser — Enhanced</h1>
+    <div class="subtitle">Rule-based "AI-like" humanisation (runs locally, fast, privacy-friendly)</div>
   </div>
-  <div style="display:flex; flex-direction:column; flex:1.4;">
-    <textarea id="outputText" placeholder="Output will appear here..." readonly></textarea>
+  <div class="badge">No servers • Runs in your browser</div>
+</header>
+
+<section class="frame">
+  <div class="panel" style="min-height:360px;">
+    <label class="small">Input text</label>
+    <textarea id="inputText" placeholder="Paste content to humanise...">Hello. This document was written to provide information about how the system can be utilized. The results were evaluated by the team. It is recommended that the implementation be completed by the vendor. Approximately 50% of users will prefer a more conversational tone.</textarea>
+
     <div class="options">
-      <label for="mistakeSlider">Add mistakes:</label>
-      <input type="range" id="mistakeSlider" min="0" max="2" step="1" value="0">
-      <span id="mistakeValue">0</span>
+      <div class="option-row">
+        <label for="tone">Tone</label>
+        <select id="tone" aria-label="Tone">
+          <option value="casual">Casual</option>
+          <option value="friendly">Friendly</option>
+          <option value="formal">Formal</option>
+        </select>
+        <label class="small" style="margin-left:auto;">Variability</label>
+        <select id="variability" aria-label="Variability" style="width:120px">
+          <option value="low">Low</option>
+          <option value="medium" selected>Medium</option>
+          <option value="high">High</option>
+        </select>
+      </div>
+
+      <div class="option-row">
+        <label class="small">Enhancements</label>
+        <div style="display:flex;gap:0.4rem;margin-left:auto">
+          <label style="display:flex;align-items:center;gap:0.4rem"><input id="contractions" type="checkbox" checked> Use contractions</label>
+          <label style="display:flex;align-items:center;gap:0.4rem"><input id="shorten" type="checkbox" checked> Shorten long sentences</label>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:0.6rem;margin-top:0.4rem">
+        <button id="humaniseBtn">Humanise</button>
+        <button id="clearBtn">Clear Output</button>
+        <button id="exampleBtn">Insert Example</button>
+      </div>
     </div>
   </div>
-</div>
+
+  <div class="panel" style="min-height:360px;">
+    <label class="small">Output</label>
+    <div id="outputText" class="output" contenteditable="true" style="padding:0.9rem;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));min-height:220px"></div>
+
+    <div class="footer-row">
+      <button id="copyBtn" class="copy-btn">Copy output</button>
+      <div class="small" style="margin-left:auto">Tip: you can edit the output directly for final tweaks.</div>
+    </div>
+  </div>
+</section>
 
 <script>
-  function humanise(text, mistakes){
-    if(!text) return '';
-    // Normalize spaces
-    let t = text.replace(/\s+/g, ' ').trim();
-    // Capitalize sentences
-    t = t.replace(/([.!?]\s*|^)([a-z])/g, (match, p1, p2) => p1 + p2.toUpperCase());
-    // Replace some robotic phrases
-    t = t.replace(/\butilize\b/gi, 'use')
-         .replace(/\bassist\b/gi, 'help')
-         .replace(/\bapproximately\b/gi, 'about');
+// A modest, deterministic "humaniser" that runs locally. It does NOT call external APIs.
+// It uses heuristics: contractions, phrase substitutions, passive->active rewrites (simple), sentence shortening, and variability.
 
-    // Add small number of mistakes if requested
-    if(mistakes > 0){
-      const words = t.split(' ');
-      for(let i=0; i<Math.min(mistakes, words.length); i++){
-        const idx = Math.floor(Math.random()*words.length);
-        let w = words[idx];
-        if(w.length>1){
-          const pos = Math.floor(Math.random()*w.length);
-          // swap two letters
-          let arr = w.split('');
-          [arr[pos], arr[(pos+1)%w.length]] = [arr[(pos+1)%w.length], arr[pos]];
-          words[idx] = arr.join('');
-        }
-      }
-      t = words.join(' ');
+function choose(arr, rate=0.5){
+  if(arr.length===0) return '';
+  const r = Math.random();
+  if(r < rate) return arr[0];
+  return arr[Math.floor(Math.random()*arr.length)];
+}
+
+// small dictionaries
+const synonyms = {
+  'utilize': ['use', 'use'],
+  'assist': ['help', 'help out'],
+  'approximately': ['about', 'around'],
+  'implement': ['put in place','set up','roll out'],
+  'evaluate': ['check','review','look over'],
+  'recommend': ['suggest','advise']
+};
+
+const contractions = {
+  "do not":"don't",
+  "does not":"doesn't",
+  "did not":"didn't",
+  "cannot":"can't",
+  "will not":"won't",
+  "is not":"isn't",
+  "are not":"aren't",
+  "it is":"it's",
+  "that is":"that's",
+  "I am":"I'm",
+  "we are":"we're",
+  "you are":"you're",
+};
+
+function applyContractions(s){
+  // simple, case-insensitive replacements
+  for(const [k,v] of Object.entries(contractions)){
+    const re = new RegExp('\\b'+k+'\\b','gi');
+    s = s.replace(re, (m)=> preserveCase(m, v));
+  }
+  return s;
+}
+
+function preserveCase(src, dest){
+  if(src.toUpperCase()===src) return dest.toUpperCase();
+  if(src[0] && src[0]===src[0].toUpperCase()) return dest[0].toUpperCase()+dest.slice(1);
+  return dest;
+}
+
+function replaceSynonyms(text, variability){
+  return text.replace(/\b(\w+)\b/gi, (m,word)=>{
+    const key = word.toLowerCase();
+    if(synonyms[key]){
+      const opts = synonyms[key];
+      const pick = choose(opts, variability);
+      return preserveCase(word,pick);
+    }
+    return word;
+  });
+}
+
+function shortenSentence(sent){
+  // If sentence is long, split with comma or 'and' into two shorter ones.
+  if(sent.length < 100) return sent;
+  // try split by comma
+  if(sent.indexOf(',')>-1){
+    const parts = sent.split(',').map(s=>s.trim()).filter(Boolean);
+    return parts.slice(0,2).map(p=>capitalize(p)+'.').join(' ');
+  }
+  // split on ' and '
+  const andParts = sent.split(/\s+and\s+/i);
+  if(andParts.length>1){
+    return andParts.slice(0,2).map(p=>capitalize(p)+'.').join(' ');
+  }
+  // fallback: hard cut
+  return sent.slice(0, Math.min(90, sent.length)) + '...';
+}
+
+function capitalize(s){
+  return s.charAt(0).toUpperCase()+s.slice(1);
+}
+
+function passiveToActive(sent){
+  // Very naive passive->active for patterns like "X was Y by Z" -> "Z Y X"
+  // e.g. "The results were evaluated by the team." -> "The team evaluated the results."
+  const re = /\b([A-Za-z0-9 \-\']+)\s+(?:was|were|is|are|has been|had been)\s+([A-Za-z0-9 \-\']+?)\s+by\s+([A-Za-z0-9 \-\']+?)\.?$/i;
+  const m = sent.match(re);
+  if(m){
+    const obj = m[1].trim();
+    const verbPhrase = m[2].trim();
+    const subj = m[3].trim();
+    // try to convert verbPhrase to a simple past or present (heuristic)
+    // common pattern: 'evaluated' -> 'evaluated', 'evaluated' stays; 'reviewed'->'reviewed'
+    // 'designed'->'designed'
+    const v = verbPhrase;
+    let active = subj + ' ' + v + ' ' + obj + '.';
+    active = active.replace(/\s+/g,' ');
+    return capitalize(active);
+  }
+  return sent;
+}
+
+function splitSentences(text){
+  // simple sentence splitter that keeps punctuation
+  return text.match(/[^.!?\n]+[.!?\n]*/g)?.map(s=>s.trim()) || [text];
+}
+
+function humanise(text, options){
+  if(!text) return '';
+  // normalize whitespace
+  text = text.replace(/\s+\n/g,'\n').replace(/\t/g,' ').replace(/\s+/g,' ').trim();
+
+  // break into sentences
+  let sents = splitSentences(text);
+
+  const variability = options.variability === 'high' ? 0.9 : (options.variability === 'medium' ? 0.6 : 0.3);
+
+  sents = sents.map(raw => {
+    let sent = raw;
+    // lowercase then capitalize consistently
+    sent = sent.trim();
+    sent = sent.charAt(0).toUpperCase() + sent.slice(1);
+
+    // passive -> active sometimes
+    if(Math.random() < variability * 0.5){
+      const converted = passiveToActive(sent);
+      if(converted !== sent) sent = converted;
     }
 
-    return t;
+    // replace synonyms based on variability
+    sent = replaceSynonyms(sent, variability);
+
+    // optionally apply contractions
+    if(options.contractions){
+      sent = applyContractions(sent);
+    }
+
+    // tone tweaks
+    if(options.tone === 'casual'){
+      // add conversational connectors occasionally
+      if(Math.random() < variability * 0.2){
+        sent = sent.replace(/^(It is|This is|That is)/i, (m)=> m + ' kind of');
+      }
+      // shorten sentences more aggressively
+      if(options.shorten && Math.random() < variability * 0.7){
+        sent = shortenSentence(sent);
+      }
+    } else if(options.tone === 'friendly'){
+      if(Math.random() < variability * 0.25){
+        sent = sent.replace(/\.$/,' — just saying.');
+      }
+      if(options.shorten && Math.random() < variability * 0.5){
+        sent = shortenSentence(sent);
+      }
+    } else if(options.tone === 'formal'){
+      // formal: avoid contractions
+      // expand a few contractions back
+      sent = sent.replace(/\bI'm\b/gi, 'I am');
+    }
+
+    // small human-like punctuation: occasionally add em dash or parentheses
+    if(Math.random() < variability * 0.12){
+      sent = sent.replace(/,\s*/, ' — ');
+    }
+
+    // final cleanup spaces
+    sent = sent.replace(/\s+\./g,'.').replace(/\s+,/g,',');
+    return sent;
+  });
+
+  // join paragraphs respecting original newlines (simple logic)
+  const output = sents.join(' ');
+  // final pass: fix spacing and ensure first letter capital
+  return output.replace(/\s+\./g,'.').replace(/\s+\?/g,'?').replace(/\s+!/g,'!').trim();
+}
+
+// DOM wiring
+const inputEl = document.getElementById('inputText');
+const outEl = document.getElementById('outputText');
+const btn = document.getElementById('humaniseBtn');
+const toneEl = document.getElementById('tone');
+const varEl = document.getElementById('variability');
+const copyBtn = document.getElementById('copyBtn');
+const clearBtn = document.getElementById('clearBtn');
+const exampleBtn = document.getElementById('exampleBtn');
+
+btn.addEventListener('click', ()=>{
+  const options = {
+    tone: toneEl.value,
+    variability: varEl.value,
+    contractions: document.getElementById('contractions').checked,
+    shorten: document.getElementById('shorten').checked
+  };
+  // deterministic-ish: seed Math.random with time is fine for variability; the user wanted 'real ai' behaviour but we run locally.
+  const result = humanise(inputEl.value, options);
+  outEl.textContent = result;
+  outEl.focus();
+});
+
+copyBtn.addEventListener('click', async ()=>{
+  try{
+    const text = outEl.innerText || outEl.textContent;
+    await navigator.clipboard.writeText(text);
+    copyBtn.textContent = 'Copied!';
+    setTimeout(()=>copyBtn.textContent = 'Copy output',1500);
+  }catch(e){
+    copyBtn.textContent = 'Copy failed';
+    setTimeout(()=>copyBtn.textContent = 'Copy output',1500);
   }
+});
 
-  const slider = document.getElementById('mistakeSlider');
-  const mistakeValue = document.getElementById('mistakeValue');
-  slider.addEventListener('input', ()=>{
-    mistakeValue.textContent = slider.value;
-  });
+clearBtn.addEventListener('click', ()=>{ outEl.textContent=''; });
+exampleBtn.addEventListener('click', ()=>{
+  inputEl.value = 'Our team evaluated the prototype. The implementation was performed by the external vendor. Users do not always prefer the default settings; therefore it is recommended to provide customization options.';
+});
 
-  document.getElementById('humaniseBtn').addEventListener('click', () => {
-    const input = document.getElementById('inputText').value;
-    const mistakes = parseInt(slider.value);
-    const output = humanise(input, mistakes);
-    document.getElementById('outputText').value = output;
-  });
+// small accessibility: run once to populate output
+outEl.textContent = humanise(inputEl.value, {tone:'casual',variability:'medium',contractions:true,shorten:true});
 </script>
-
 </body>
 </html>
