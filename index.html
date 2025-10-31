@@ -76,7 +76,7 @@
   }
 
   .controls{display:flex;gap:0.6rem;align-items:center}
-  select,button{background:var(--glass);border:none;padding:0.6rem 0.8rem;border-radius:10px;color:var(--text);font-weight:600}
+  select,button,input[type="range"]{background:var(--glass);border:none;padding:0.6rem 0.8rem;border-radius:10px;color:var(--text);font-weight:600}
   button{cursor:pointer}
   .small{font-size:0.9rem;color:var(--muted)}
 
@@ -94,14 +94,14 @@
   }
 
   /* micro typographic polish for output */
-  .output{white-space:pre-wrap;word-break:break-word}
+  .output{white-space:pre-wrap;word-break:break-word; min-height:220px; padding:0.9rem; border-radius:10px; background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005))}
 </style>
 </head>
 <body>
 <header>
   <div>
     <h1>Humaniser — Enhanced</h1>
-    <div class="subtitle">Rule-based "AI-like" humanisation (runs locally, fast, privacy-friendly)</div>
+    <div class="subtitle">Local, deterministic-ish humanisation. No external servers.</div>
   </div>
   <div class="badge">No servers • Runs in your browser</div>
 </header>
@@ -119,6 +119,7 @@
           <option value="friendly">Friendly</option>
           <option value="formal">Formal</option>
         </select>
+
         <label class="small" style="margin-left:auto;">Variability</label>
         <select id="variability" aria-label="Variability" style="width:120px">
           <option value="low">Low</option>
@@ -135,245 +136,93 @@
         </div>
       </div>
 
+      <div class="option-row">
+        <label class="small">Strength</label>
+        <input id="strength" type="range" min="0" max="1" step="0.1" value="0.6" style="width:200px;margin-left:8px">
+        <div class="small" id="strengthLabel" style="margin-left:auto">0.6</div>
+      </div>
+
       <div style="display:flex;gap:0.6rem;margin-top:0.4rem">
         <button id="humaniseBtn">Humanise</button>
         <button id="clearBtn">Clear Output</button>
         <button id="exampleBtn">Insert Example</button>
+        <button id="undoBtn">Undo</button>
       </div>
     </div>
   </div>
 
   <div class="panel" style="min-height:360px;">
     <label class="small">Output</label>
-    <div id="outputText" class="output" contenteditable="true" style="padding:0.9rem;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));min-height:220px"></div>
+    <div id="outputText" class="output" contenteditable="true"></div>
 
     <div class="footer-row">
       <button id="copyBtn" class="copy-btn">Copy output</button>
-      <div class="small" style="margin-left:auto">Tip: you can edit the output directly for final tweaks.</div>
+      <div class="small" style="margin-left:auto">Tip: edits in the output area are preserved.</div>
     </div>
   </div>
 </section>
 
+<!-- load the external humaniser -->
+<script src="humaniser.js"></script>
 <script>
-// A modest, deterministic "humaniser" that runs locally. It does NOT call external APIs.
-// It uses heuristics: contractions, phrase substitutions, passive->active rewrites (simple), sentence shortening, and variability.
+  // small wiring to UI
+  const inputEl = document.getElementById('inputText');
+  const outEl = document.getElementById('outputText');
+  const btn = document.getElementById('humaniseBtn');
+  const toneEl = document.getElementById('tone');
+  const varEl = document.getElementById('variability');
+  const copyBtn = document.getElementById('copyBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const exampleBtn = document.getElementById('exampleBtn');
+  const undoBtn = document.getElementById('undoBtn');
+  const strength = document.getElementById('strength');
+  const strengthLabel = document.getElementById('strengthLabel');
 
-function choose(arr, rate=0.5){
-  if(arr.length===0) return '';
-  const r = Math.random();
-  if(r < rate) return arr[0];
-  return arr[Math.floor(Math.random()*arr.length)];
-}
+  let lastOutput = '';
+  let lastInput = inputEl.value;
 
-// small dictionaries
-const synonyms = {
-  'utilize': ['use', 'use'],
-  'assist': ['help', 'help out'],
-  'approximately': ['about', 'around'],
-  'implement': ['put in place','set up','roll out'],
-  'evaluate': ['check','review','look over'],
-  'recommend': ['suggest','advise']
-};
+  strength.addEventListener('input', ()=>{ strengthLabel.textContent = strength.value; });
 
-const contractions = {
-  "do not":"don't",
-  "does not":"doesn't",
-  "did not":"didn't",
-  "cannot":"can't",
-  "will not":"won't",
-  "is not":"isn't",
-  "are not":"aren't",
-  "it is":"it's",
-  "that is":"that's",
-  "I am":"I'm",
-  "we are":"we're",
-  "you are":"you're",
-};
-
-function applyContractions(s){
-  // simple, case-insensitive replacements
-  for(const [k,v] of Object.entries(contractions)){
-    const re = new RegExp('\\b'+k+'\\b','gi');
-    s = s.replace(re, (m)=> preserveCase(m, v));
-  }
-  return s;
-}
-
-function preserveCase(src, dest){
-  if(src.toUpperCase()===src) return dest.toUpperCase();
-  if(src[0] && src[0]===src[0].toUpperCase()) return dest[0].toUpperCase()+dest.slice(1);
-  return dest;
-}
-
-function replaceSynonyms(text, variability){
-  return text.replace(/\b(\w+)\b/gi, (m,word)=>{
-    const key = word.toLowerCase();
-    if(synonyms[key]){
-      const opts = synonyms[key];
-      const pick = choose(opts, variability);
-      return preserveCase(word,pick);
-    }
-    return word;
-  });
-}
-
-function shortenSentence(sent){
-  // If sentence is long, split with comma or 'and' into two shorter ones.
-  if(sent.length < 100) return sent;
-  // try split by comma
-  if(sent.indexOf(',')>-1){
-    const parts = sent.split(',').map(s=>s.trim()).filter(Boolean);
-    return parts.slice(0,2).map(p=>capitalize(p)+'.').join(' ');
-  }
-  // split on ' and '
-  const andParts = sent.split(/\s+and\s+/i);
-  if(andParts.length>1){
-    return andParts.slice(0,2).map(p=>capitalize(p)+'.').join(' ');
-  }
-  // fallback: hard cut
-  return sent.slice(0, Math.min(90, sent.length)) + '...';
-}
-
-function capitalize(s){
-  return s.charAt(0).toUpperCase()+s.slice(1);
-}
-
-function passiveToActive(sent){
-  // Very naive passive->active for patterns like "X was Y by Z" -> "Z Y X"
-  // e.g. "The results were evaluated by the team." -> "The team evaluated the results."
-  const re = /\b([A-Za-z0-9 \-\']+)\s+(?:was|were|is|are|has been|had been)\s+([A-Za-z0-9 \-\']+?)\s+by\s+([A-Za-z0-9 \-\']+?)\.?$/i;
-  const m = sent.match(re);
-  if(m){
-    const obj = m[1].trim();
-    const verbPhrase = m[2].trim();
-    const subj = m[3].trim();
-    // try to convert verbPhrase to a simple past or present (heuristic)
-    // common pattern: 'evaluated' -> 'evaluated', 'evaluated' stays; 'reviewed'->'reviewed'
-    // 'designed'->'designed'
-    const v = verbPhrase;
-    let active = subj + ' ' + v + ' ' + obj + '.';
-    active = active.replace(/\s+/g,' ');
-    return capitalize(active);
-  }
-  return sent;
-}
-
-function splitSentences(text){
-  // simple sentence splitter that keeps punctuation
-  return text.match(/[^.!?\n]+[.!?\n]*/g)?.map(s=>s.trim()) || [text];
-}
-
-function humanise(text, options){
-  if(!text) return '';
-  // normalize whitespace
-  text = text.replace(/\s+\n/g,'\n').replace(/\t/g,' ').replace(/\s+/g,' ').trim();
-
-  // break into sentences
-  let sents = splitSentences(text);
-
-  const variability = options.variability === 'high' ? 0.9 : (options.variability === 'medium' ? 0.6 : 0.3);
-
-  sents = sents.map(raw => {
-    let sent = raw;
-    // lowercase then capitalize consistently
-    sent = sent.trim();
-    sent = sent.charAt(0).toUpperCase() + sent.slice(1);
-
-    // passive -> active sometimes
-    if(Math.random() < variability * 0.5){
-      const converted = passiveToActive(sent);
-      if(converted !== sent) sent = converted;
-    }
-
-    // replace synonyms based on variability
-    sent = replaceSynonyms(sent, variability);
-
-    // optionally apply contractions
-    if(options.contractions){
-      sent = applyContractions(sent);
-    }
-
-    // tone tweaks
-    if(options.tone === 'casual'){
-      // add conversational connectors occasionally
-      if(Math.random() < variability * 0.2){
-        sent = sent.replace(/^(It is|This is|That is)/i, (m)=> m + ' kind of');
-      }
-      // shorten sentences more aggressively
-      if(options.shorten && Math.random() < variability * 0.7){
-        sent = shortenSentence(sent);
-      }
-    } else if(options.tone === 'friendly'){
-      if(Math.random() < variability * 0.25){
-        sent = sent.replace(/\.$/,' — just saying.');
-      }
-      if(options.shorten && Math.random() < variability * 0.5){
-        sent = shortenSentence(sent);
-      }
-    } else if(options.tone === 'formal'){
-      // formal: avoid contractions
-      // expand a few contractions back
-      sent = sent.replace(/\bI'm\b/gi, 'I am');
-    }
-
-    // small human-like punctuation: occasionally add em dash or parentheses
-    if(Math.random() < variability * 0.12){
-      sent = sent.replace(/,\s*/, ' — ');
-    }
-
-    // final cleanup spaces
-    sent = sent.replace(/\s+\./g,'.').replace(/\s+,/g,',');
-    return sent;
+  btn.addEventListener('click', ()=>{
+    const options = {
+      tone: toneEl.value,
+      variability: varEl.value,
+      contractions: document.getElementById('contractions').checked,
+      shorten: document.getElementById('shorten').checked,
+      strength: parseFloat(strength.value)
+    };
+    // seed optionally from the current time — reproducible for this run
+    humaniser.seed(Math.floor(Date.now() % 2147483647));
+    lastOutput = outEl.textContent;
+    lastInput = inputEl.value;
+    const result = humaniser.humanise(inputEl.value, options);
+    outEl.textContent = result;
+    outEl.focus();
   });
 
-  // join paragraphs respecting original newlines (simple logic)
-  const output = sents.join(' ');
-  // final pass: fix spacing and ensure first letter capital
-  return output.replace(/\s+\./g,'.').replace(/\s+\?/g,'?').replace(/\s+!/g,'!').trim();
-}
+  copyBtn.addEventListener('click', async ()=>{
+    try{
+      const text = outEl.innerText || outEl.textContent;
+      await navigator.clipboard.writeText(text);
+      copyBtn.textContent = 'Copied!';
+      setTimeout(()=>copyBtn.textContent = 'Copy output',1500);
+    }catch(e){
+      copyBtn.textContent = 'Copy failed';
+      setTimeout(()=>copyBtn.textContent = 'Copy output',1500);
+    }
+  });
 
-// DOM wiring
-const inputEl = document.getElementById('inputText');
-const outEl = document.getElementById('outputText');
-const btn = document.getElementById('humaniseBtn');
-const toneEl = document.getElementById('tone');
-const varEl = document.getElementById('variability');
-const copyBtn = document.getElementById('copyBtn');
-const clearBtn = document.getElementById('clearBtn');
-const exampleBtn = document.getElementById('exampleBtn');
+  clearBtn.addEventListener('click', ()=>{ outEl.textContent=''; });
+  exampleBtn.addEventListener('click', ()=>{
+    inputEl.value = 'Our team evaluated the prototype. The implementation was performed by the external vendor. Users do not always prefer the default settings; therefore it is recommended to provide customization options.';
+  });
+  undoBtn.addEventListener('click', ()=>{
+    outEl.textContent = lastOutput || '';
+  });
 
-btn.addEventListener('click', ()=>{
-  const options = {
-    tone: toneEl.value,
-    variability: varEl.value,
-    contractions: document.getElementById('contractions').checked,
-    shorten: document.getElementById('shorten').checked
-  };
-  // deterministic-ish: seed Math.random with time is fine for variability; the user wanted 'real ai' behaviour but we run locally.
-  const result = humanise(inputEl.value, options);
-  outEl.textContent = result;
-  outEl.focus();
-});
-
-copyBtn.addEventListener('click', async ()=>{
-  try{
-    const text = outEl.innerText || outEl.textContent;
-    await navigator.clipboard.writeText(text);
-    copyBtn.textContent = 'Copied!';
-    setTimeout(()=>copyBtn.textContent = 'Copy output',1500);
-  }catch(e){
-    copyBtn.textContent = 'Copy failed';
-    setTimeout(()=>copyBtn.textContent = 'Copy output',1500);
-  }
-});
-
-clearBtn.addEventListener('click', ()=>{ outEl.textContent=''; });
-exampleBtn.addEventListener('click', ()=>{
-  inputEl.value = 'Our team evaluated the prototype. The implementation was performed by the external vendor. Users do not always prefer the default settings; therefore it is recommended to provide customization options.';
-});
-
-// small accessibility: run once to populate output
-outEl.textContent = humanise(inputEl.value, {tone:'casual',variability:'medium',contractions:true,shorten:true});
+  // initial population
+  humaniser.seed(Math.floor(Date.now() % 2147483647));
+  outEl.textContent = humaniser.humanise(inputEl.value, {tone:'casual',variability:'medium',contractions:true,shorten:true,strength:0.6});
 </script>
 </body>
 </html>
