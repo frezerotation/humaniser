@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="nl">
+<html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Humaniser — NL / EN</title>
+<title>Humaniser — NL & EN (Diff + AI Mode)</title>
 <style>
 :root{
   --bg: linear-gradient(180deg,#071028 0%, #0b0f1c 100%);
@@ -15,6 +15,7 @@
   --radius: 12px;
   --gap: 1rem;
   --shadow: 0 6px 20px rgba(2,6,23,0.6);
+  font-smoothing:antialiased;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
@@ -23,10 +24,12 @@ body{
   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
   display:flex;flex-direction:column;gap:var(--gap);
 }
+
+/* layout */
 .header{display:flex;align-items:center;justify-content:space-between}
 h1{margin:0;font-size:1.2rem}
 .subtitle{color:var(--muted);font-size:0.9rem}
-.frame{display:grid;grid-template-columns:1fr 1.3fr;gap:1rem;align-items:start}
+.frame{display:grid;grid-template-columns:1fr 1.4fr;gap:1rem;align-items:start}
 .panel{background:var(--card);padding:1rem;border-radius:var(--radius);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:0.6rem}
 textarea{width:100%;min-height:160px;border-radius:10px;padding:0.9rem;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);color:var(--text);resize:vertical;font-size:1rem;line-height:1.5;font-family:inherit}
 select,input[type="range"],button{background:var(--glass);border:none;padding:0.5rem 0.7rem;border-radius:10px;color:var(--text);font-weight:600}
@@ -37,146 +40,203 @@ select,input[type="range"],button{background:var(--glass);border:none;padding:0.
 .option-row{display:flex;gap:0.5rem;align-items:center}
 label{font-size:0.9rem;color:var(--muted)}
 .badge{background:rgba(255,255,255,0.03);padding:0.4rem 0.6rem;border-radius:999px;color:var(--muted);font-size:0.85rem}
-.output{white-space:pre-wrap;word-break:break-word;min-height:220px;padding:0.9rem;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005))}
+
+/* output area that's contentEditable and shows diffs */
+.output{white-space:pre-wrap;word-break:break-word;min-height:220px;padding:0.9rem;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));color:var(--text);outline:none}
+
+/* diff styling */
+.diff-ins{
+  background: rgba(29,131,72,0.12);
+  border-bottom: 2px solid rgba(29,131,72,0.85);
+  color: #c8ffd8;
+  padding: 0 1px;
+  border-radius:2px;
+}
+.diff-del{
+  background: rgba(153,27,27,0.08);
+  color:#ffd6d6;
+  text-decoration: line-through;
+  padding: 0 1px;
+  border-radius:2px;
+  margin-right:2px;
+  font-style:normal;
+}
+.diff-repl{display:inline-flex;gap:6px;align-items:center}
+.legend{display:flex;gap:0.75rem;align-items:center;font-size:0.9rem;color:var(--muted);margin-top:6px}
+.legend .box{padding:4px 8px;border-radius:8px;font-weight:600}
+.box-ins{background: rgba(29,131,72,0.12);border-bottom:2px solid rgba(29,131,72,0.85);color:#c8ffd8}
+.box-del{background: rgba(153,27,27,0.08);color:#ffd6d6;text-decoration:line-through}
+
+/* small responsive */
 @media(max-width:880px){.frame{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="header">
   <div>
-    <h1>Humaniser — NL & EN</h1>
-    <div class="subtitle">Preserve layout • Geen em-dashes • Lokale verwerking</div>
+    <h1>Humaniser — NL & EN (Diff + AI)</h1>
+    <div class="subtitle">Shows colored edits, cleared by default, can rewrite sentences</div>
   </div>
   <div class="badge">Local • Privacy-friendly</div>
 </div>
 
 <section class="frame">
   <div class="panel">
-    <label class="small">Input text / Tekst invoer</label>
-    <textarea id="inputText" placeholder="Plak tekst hier...">Our team evaluated the prototype. The implementation was performed by the external vendor. Users do not always prefer the default settings; therefore it is recommended to provide customization options.
-
-Ons team heeft het prototype geëvalueerd. De implementatie werd uitgevoerd door de externe leverancier. Gebruikers geven niet altijd de voorkeur aan de standaardinstellingen; daarom wordt aanbevolen om aanpassingsmogelijkheden te bieden.</textarea>
+    <label class="small">Input text / Tekst invoer (cleared by default)</label>
+    <textarea id="inputText" placeholder="Paste text here..."></textarea>
 
     <div class="options">
       <div class="option-row">
         <label for="lang">Language / Taal</label>
-        <select id="lang" aria-label="Language" style="width:150px;margin-left:8px">
+        <select id="lang" style="width:150px;margin-left:8px">
           <option value="auto">Auto-detect</option>
           <option value="en">English</option>
           <option value="nl">Nederlands</option>
         </select>
 
-        <label style="margin-left:auto" class="small">Tone / Toon</label>
-        <select id="tone" style="width:140px">
-          <option value="casual">Casual / Informal</option>
-          <option value="friendly">Friendly / Vriendelijk</option>
-          <option value="formal">Formal / Formeel</option>
+        <label style="margin-left:auto" class="small">AI mode</label>
+        <select id="aiMode" style="width:120px;margin-left:8px">
+          <option value="off">Off (safe)</option>
+          <option value="on" selected>On (aggressive)</option>
         </select>
       </div>
 
       <div class="option-row">
-        <label class="small">Variability</label>
-        <select id="variability" style="width:120px;margin-left:8px">
-          <option value="low">Low</option>
-          <option value="medium" selected>Medium</option>
-          <option value="high">High</option>
+        <label class="small">Tone</label>
+        <select id="tone" style="width:160px;margin-left:8px">
+          <option value="casual">Casual</option>
+          <option value="friendly">Friendly</option>
+          <option value="formal" selected>Formal</option>
         </select>
 
-        <label class="small" style="margin-left:auto">Use contractions / Gebruik samentrekkingen</label>
-        <input id="contractions" type="checkbox" checked />
+        <label class="small" style="margin-left:auto">Rewrite sentences</label>
+        <input id="rewrite" type="checkbox" checked />
       </div>
 
       <div class="option-row">
-        <label class="small">Shorten long sentences</label>
-        <input id="shorten" type="checkbox" checked style="margin-left:8px"/>
-
-        <label class="small" style="margin-left:auto">Strength</label>
-        <input id="strength" type="range" min="0" max="1" step="0.1" value="0.7" style="width:180px;margin-left:8px">
-        <div class="small" id="strengthLabel" style="margin-left:8px">0.7</div>
+        <label class="small">Strength</label>
+        <input id="strength" type="range" min="0" max="1" step="0.1" value="0.8" style="width:180px;margin-left:8px">
+        <div class="small" id="strengthLabel" style="margin-left:8px">0.8</div>
       </div>
 
       <div style="display:flex;gap:0.6rem;margin-top:0.4rem">
-        <button id="humaniseBtn">Humanise / Humaniseer</button>
-        <button id="clearBtn">Clear Output</button>
+        <button id="humaniseBtn">Humanise</button>
+        <button id="clearBtn">Clear In/Out</button>
         <button id="exampleBtn">Insert Example</button>
         <button id="undoBtn">Undo</button>
+        <button id="copyBtn" class="copy-btn" style="margin-left:auto">Copy output (HTML)</button>
+      </div>
+
+      <div class="legend" aria-hidden="true">
+        <div class="box box-ins">Inserted / Added</div>
+        <div class="box box-del">Deleted / Removed</div>
       </div>
     </div>
   </div>
 
   <div class="panel">
-    <label class="small">Output / Uitvoer</label>
+    <label class="small">Output (colored diff - editable)</label>
     <div id="outputText" class="output" contenteditable="true"></div>
 
-    <div class="footer-row">
-      <button id="copyBtn" class="copy-btn">Copy output</button>
-      <div class="small" style="margin-left:auto">You can edit the output directly / Je kunt de uitvoer direct bewerken.</div>
+    <div class="footer-row" style="margin-top:8px">
+      <div class="small" style="margin-left:auto">Tip: edits in the output area are preserved. Use "Copy output (HTML)" to copy colored HTML.</div>
     </div>
   </div>
 </section>
 
 <script src="humaniser.js"></script>
 <script>
+/* UI wiring */
 const inputEl = document.getElementById('inputText');
 const outEl = document.getElementById('outputText');
 const btn = document.getElementById('humaniseBtn');
 const langEl = document.getElementById('lang');
+const aiModeEl = document.getElementById('aiMode');
 const toneEl = document.getElementById('tone');
-const varEl = document.getElementById('variability');
+const rewriteEl = document.getElementById('rewrite');
 const copyBtn = document.getElementById('copyBtn');
 const clearBtn = document.getElementById('clearBtn');
 const exampleBtn = document.getElementById('exampleBtn');
 const undoBtn = document.getElementById('undoBtn');
-const contractionsEl = document.getElementById('contractions');
-const shortenEl = document.getElementById('shorten');
 const strength = document.getElementById('strength');
 const strengthLabel = document.getElementById('strengthLabel');
 
-let lastOutput = '';
+let lastOutputHTML = '';
 let lastInput = '';
+
+// clear inputs & outputs by default
+inputEl.value = '';
+outEl.innerHTML = '';
+lastOutputHTML = '';
+lastInput = '';
 
 strength.addEventListener('input', ()=> strengthLabel.textContent = strength.value);
 
 btn.addEventListener('click', ()=>{
   const options = {
     tone: toneEl.value,
-    variability: varEl.value,
-    contractions: contractionsEl.checked,
-    shorten: shortenEl.checked,
+    variability: document.getElementById('aiMode').value === 'on' ? 'high' : 'medium',
+    contractions: true,
+    shorten: true,
     strength: parseFloat(strength.value),
-    lang: langEl.value
+    lang: langEl.value,
+    aiMode: aiModeEl.value === 'on',
+    rewrite: rewriteEl.checked
   };
 
-  // seed per run for reproducible behaviour during this session
   humaniser.seed(Math.floor(Date.now() % 2147483647));
-  lastOutput = outEl.textContent;
+  lastOutputHTML = outEl.innerHTML;
   lastInput = inputEl.value;
-  const result = humaniser.humanise(inputEl.value, options);
-  outEl.textContent = result;
+
+  // get plain rewritten text (not HTML)
+  const rewritten = humaniser.humanise(inputEl.value, options);
+
+  // build diff HTML comparing input -> rewritten while preserving lines
+  const diffHTML = humaniser.diffHighlight(inputEl.value, rewritten, {lang: options.lang});
+  outEl.innerHTML = diffHTML;
   outEl.focus();
 });
 
 copyBtn.addEventListener('click', async ()=>{
   try{
-    const text = outEl.innerText || outEl.textContent;
-    await navigator.clipboard.writeText(text);
+    // copy HTML (so colors are preserved)
+    const html = outEl.innerHTML;
+    // modern clipboard supports html
+    await navigator.clipboard.write([
+      new ClipboardItem({
+        'text/html': new Blob([html], {type: 'text/html'}),
+        'text/plain': new Blob([outEl.innerText], {type: 'text/plain'})
+      })
+    ]);
     copyBtn.textContent = 'Copied!';
-    setTimeout(()=>copyBtn.textContent = 'Copy output',1400);
+    setTimeout(()=>copyBtn.textContent = 'Copy output (HTML)',1400);
   }catch(e){
-    copyBtn.textContent = 'Copy failed';
-    setTimeout(()=>copyBtn.textContent = 'Copy output',1400);
+    // fallback: copy plain text
+    try { await navigator.clipboard.writeText(outEl.innerText); copyBtn.textContent='Copied!'; }
+    catch(_) { copyBtn.textContent='Copy failed'; }
+    setTimeout(()=>copyBtn.textContent = 'Copy output (HTML)',1400);
   }
 });
 
-clearBtn.addEventListener('click', ()=> outEl.textContent = '');
-exampleBtn.addEventListener('click', ()=> {
-  inputEl.value = "Our testing team reviewed the build and recommended follow-up work. It was deployed by an external partner. Not all users prefer the default settings; offer customization.\n\nOns testteam heeft het bouwsel nagekeken en vervolgwerk aanbevolen. Het werd uitgerold door een externe partner. Niet alle gebruikers geven de voorkeur aan de standaardinstellingen; bied aanpassingen aan.";
+clearBtn.addEventListener('click', ()=>{
+  inputEl.value = '';
+  outEl.innerHTML = '';
 });
-undoBtn.addEventListener('click', ()=> outEl.textContent = lastOutput || '');
 
-// initial render
-humaniser.seed(Math.floor(Date.now() % 2147483647));
-outEl.textContent = humaniser.humanise(inputEl.value, {tone:'casual',variability:'medium',contractions:true,shorten:true,strength:0.7,lang:'auto'});
+exampleBtn.addEventListener('click', ()=>{
+  inputEl.value = `Our team evaluated the prototype. The implementation was performed by the external vendor. Users do not always prefer the default settings; therefore it is recommended to provide customization options.
+
+Ons team heeft het prototype geëvalueerd. De implementatie werd uitgevoerd door de externe leverancier. Gebruikers geven niet altijd de voorkeur aan de standaardinstellingen; daarom wordt aanbevolen om aanpassingsmogelijkheden te bieden.`;
+});
+
+undoBtn.addEventListener('click', ()=>{
+  outEl.innerHTML = lastOutputHTML || '';
+  inputEl.value = lastInput || inputEl.value;
+});
+
+// allow pressing Ctrl+Enter to humanise
+inputEl.addEventListener('keydown', (e)=>{ if(e.ctrlKey && e.key === 'Enter'){ btn.click(); } });
+
 </script>
 </body>
 </html>
