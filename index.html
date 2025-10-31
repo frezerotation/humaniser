@@ -1,149 +1,102 @@
 <!doctype html>
-<html lang="en">
+<html lang="nl">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Humaniser — Enhanced</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Humaniser — NL / EN</title>
 <style>
-  :root{
-    --bg: linear-gradient(180deg,#071028 0%, #0b0f1c 100%);
-    --card: rgba(255,255,255,0.03);
-    --muted: #9fb3c8;
-    --text: #e6eef6;
-    --accent: #7be0ff;
-    --glass: rgba(255,255,255,0.04);
-    --radius: 12px;
-    --gap: 1rem;
-    --shadow: 0 6px 20px rgba(2,6,23,0.6);
-    font-smoothing:antialiased;
-  }
-
-  *{box-sizing:border-box}
-  html,body{height:100%;}
-  body{
-    margin:0;
-    padding:2rem;
-    background:var(--bg);
-    color:var(--text);
-    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    -webkit-font-smoothing:antialiased;
-    display:flex;
-    flex-direction:column;
-    gap:var(--gap);
-    min-height:100vh;
-  }
-
-  header{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:1rem;
-  }
-  h1{margin:0;font-size:1.25rem;letter-spacing:-0.2px}
-  .subtitle{color:var(--muted);font-size:0.9rem}
-
-  .frame{
-    display:grid;
-    grid-template-columns: 1fr 1.3fr;
-    gap:1rem;
-    align-items:start;
-    width:100%;
-  }
-
-  .panel{
-    background:var(--card);
-    padding:1rem;
-    border-radius:var(--radius);
-    box-shadow:var(--shadow);
-    min-height:220px;
-    display:flex;
-    flex-direction:column;
-    gap:0.6rem;
-  }
-
-  textarea{
-    width:100%;
-    min-height:160px;
-    border-radius:10px;
-    padding:0.9rem;
-    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border:1px solid rgba(255,255,255,0.03);
-    color:var(--text);
-    resize:vertical;
-    font-size:1rem;
-    line-height:1.5;
-    font-family:inherit;
-  }
-
-  .controls{display:flex;gap:0.6rem;align-items:center}
-  select,button,input[type="range"]{background:var(--glass);border:none;padding:0.6rem 0.8rem;border-radius:10px;color:var(--text);font-weight:600}
-  button{cursor:pointer}
-  .small{font-size:0.9rem;color:var(--muted)}
-
-  .footer-row{display:flex;gap:0.6rem;align-items:center;margin-top:auto}
-  .copy-btn{background:linear-gradient(90deg, rgba(123,224,255,0.06), rgba(123,224,255,0.03));color:var(--accent)}
-
-  .options{display:flex;flex-direction:column;gap:0.5rem}
-  .option-row{display:flex;gap:0.5rem;align-items:center}
-  label{font-size:0.9rem;color:var(--muted)}
-
-  .badge{background:rgba(255,255,255,0.03);padding:0.4rem 0.6rem;border-radius:999px;color:var(--muted);font-size:0.85rem}
-
-  @media(max-width:880px){
-    .frame{grid-template-columns:1fr;}
-  }
-
-  /* micro typographic polish for output */
-  .output{white-space:pre-wrap;word-break:break-word; min-height:220px; padding:0.9rem; border-radius:10px; background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005))}
+:root{
+  --bg: linear-gradient(180deg,#071028 0%, #0b0f1c 100%);
+  --card: rgba(255,255,255,0.03);
+  --muted: #9fb3c8;
+  --text: #e6eef6;
+  --accent: #7be0ff;
+  --glass: rgba(255,255,255,0.04);
+  --radius: 12px;
+  --gap: 1rem;
+  --shadow: 0 6px 20px rgba(2,6,23,0.6);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;padding:18px;background:var(--bg);color:var(--text);
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+  display:flex;flex-direction:column;gap:var(--gap);
+}
+.header{display:flex;align-items:center;justify-content:space-between}
+h1{margin:0;font-size:1.2rem}
+.subtitle{color:var(--muted);font-size:0.9rem}
+.frame{display:grid;grid-template-columns:1fr 1.3fr;gap:1rem;align-items:start}
+.panel{background:var(--card);padding:1rem;border-radius:var(--radius);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:0.6rem}
+textarea{width:100%;min-height:160px;border-radius:10px;padding:0.9rem;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);color:var(--text);resize:vertical;font-size:1rem;line-height:1.5;font-family:inherit}
+select,input[type="range"],button{background:var(--glass);border:none;padding:0.5rem 0.7rem;border-radius:10px;color:var(--text);font-weight:600}
+.small{font-size:0.9rem;color:var(--muted)}
+.footer-row{display:flex;gap:0.6rem;align-items:center;margin-top:auto}
+.copy-btn{background:linear-gradient(90deg, rgba(123,224,255,0.06), rgba(123,224,255,0.03));color:var(--accent)}
+.options{display:flex;flex-direction:column;gap:0.5rem}
+.option-row{display:flex;gap:0.5rem;align-items:center}
+label{font-size:0.9rem;color:var(--muted)}
+.badge{background:rgba(255,255,255,0.03);padding:0.4rem 0.6rem;border-radius:999px;color:var(--muted);font-size:0.85rem}
+.output{white-space:pre-wrap;word-break:break-word;min-height:220px;padding:0.9rem;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005))}
+@media(max-width:880px){.frame{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<header>
+<div class="header">
   <div>
-    <h1>Humaniser — Enhanced</h1>
-    <div class="subtitle">Local, deterministic-ish humanisation. No external servers.</div>
+    <h1>Humaniser — NL & EN</h1>
+    <div class="subtitle">Preserve layout • Geen em-dashes • Lokale verwerking</div>
   </div>
-  <div class="badge">No servers • Runs in your browser</div>
-</header>
+  <div class="badge">Local • Privacy-friendly</div>
+</div>
 
 <section class="frame">
-  <div class="panel" style="min-height:360px;">
-    <label class="small">Input text</label>
-    <textarea id="inputText" placeholder="Paste content to humanise...">Hello. This document was written to provide information about how the system can be utilized. The results were evaluated by the team. It is recommended that the implementation be completed by the vendor. Approximately 50% of users will prefer a more conversational tone.</textarea>
+  <div class="panel">
+    <label class="small">Input text / Tekst invoer</label>
+    <textarea id="inputText" placeholder="Plak tekst hier...">Our team evaluated the prototype. The implementation was performed by the external vendor. Users do not always prefer the default settings; therefore it is recommended to provide customization options.
+
+Ons team heeft het prototype geëvalueerd. De implementatie werd uitgevoerd door de externe leverancier. Gebruikers geven niet altijd de voorkeur aan de standaardinstellingen; daarom wordt aanbevolen om aanpassingsmogelijkheden te bieden.</textarea>
 
     <div class="options">
       <div class="option-row">
-        <label for="tone">Tone</label>
-        <select id="tone" aria-label="Tone">
-          <option value="casual">Casual</option>
-          <option value="friendly">Friendly</option>
-          <option value="formal">Formal</option>
+        <label for="lang">Language / Taal</label>
+        <select id="lang" aria-label="Language" style="width:150px;margin-left:8px">
+          <option value="auto">Auto-detect</option>
+          <option value="en">English</option>
+          <option value="nl">Nederlands</option>
         </select>
 
-        <label class="small" style="margin-left:auto;">Variability</label>
-        <select id="variability" aria-label="Variability" style="width:120px">
+        <label style="margin-left:auto" class="small">Tone / Toon</label>
+        <select id="tone" style="width:140px">
+          <option value="casual">Casual / Informal</option>
+          <option value="friendly">Friendly / Vriendelijk</option>
+          <option value="formal">Formal / Formeel</option>
+        </select>
+      </div>
+
+      <div class="option-row">
+        <label class="small">Variability</label>
+        <select id="variability" style="width:120px;margin-left:8px">
           <option value="low">Low</option>
           <option value="medium" selected>Medium</option>
           <option value="high">High</option>
         </select>
+
+        <label class="small" style="margin-left:auto">Use contractions / Gebruik samentrekkingen</label>
+        <input id="contractions" type="checkbox" checked />
       </div>
 
       <div class="option-row">
-        <label class="small">Enhancements</label>
-        <div style="display:flex;gap:0.4rem;margin-left:auto">
-          <label style="display:flex;align-items:center;gap:0.4rem"><input id="contractions" type="checkbox" checked> Use contractions</label>
-          <label style="display:flex;align-items:center;gap:0.4rem"><input id="shorten" type="checkbox" checked> Shorten long sentences</label>
-        </div>
-      </div>
+        <label class="small">Shorten long sentences</label>
+        <input id="shorten" type="checkbox" checked style="margin-left:8px"/>
 
-      <div class="option-row">
-        <label class="small">Strength</label>
-        <input id="strength" type="range" min="0" max="1" step="0.1" value="0.6" style="width:200px;margin-left:8px">
-        <div class="small" id="strengthLabel" style="margin-left:auto">0.6</div>
+        <label class="small" style="margin-left:auto">Strength</label>
+        <input id="strength" type="range" min="0" max="1" step="0.1" value="0.7" style="width:180px;margin-left:8px">
+        <div class="small" id="strengthLabel" style="margin-left:8px">0.7</div>
       </div>
 
       <div style="display:flex;gap:0.6rem;margin-top:0.4rem">
-        <button id="humaniseBtn">Humanise</button>
+        <button id="humaniseBtn">Humanise / Humaniseer</button>
         <button id="clearBtn">Clear Output</button>
         <button id="exampleBtn">Insert Example</button>
         <button id="undoBtn">Undo</button>
@@ -151,78 +104,79 @@
     </div>
   </div>
 
-  <div class="panel" style="min-height:360px;">
-    <label class="small">Output</label>
+  <div class="panel">
+    <label class="small">Output / Uitvoer</label>
     <div id="outputText" class="output" contenteditable="true"></div>
 
     <div class="footer-row">
       <button id="copyBtn" class="copy-btn">Copy output</button>
-      <div class="small" style="margin-left:auto">Tip: edits in the output area are preserved.</div>
+      <div class="small" style="margin-left:auto">You can edit the output directly / Je kunt de uitvoer direct bewerken.</div>
     </div>
   </div>
 </section>
 
-<!-- load the external humaniser -->
 <script src="humaniser.js"></script>
 <script>
-  // small wiring to UI
-  const inputEl = document.getElementById('inputText');
-  const outEl = document.getElementById('outputText');
-  const btn = document.getElementById('humaniseBtn');
-  const toneEl = document.getElementById('tone');
-  const varEl = document.getElementById('variability');
-  const copyBtn = document.getElementById('copyBtn');
-  const clearBtn = document.getElementById('clearBtn');
-  const exampleBtn = document.getElementById('exampleBtn');
-  const undoBtn = document.getElementById('undoBtn');
-  const strength = document.getElementById('strength');
-  const strengthLabel = document.getElementById('strengthLabel');
+const inputEl = document.getElementById('inputText');
+const outEl = document.getElementById('outputText');
+const btn = document.getElementById('humaniseBtn');
+const langEl = document.getElementById('lang');
+const toneEl = document.getElementById('tone');
+const varEl = document.getElementById('variability');
+const copyBtn = document.getElementById('copyBtn');
+const clearBtn = document.getElementById('clearBtn');
+const exampleBtn = document.getElementById('exampleBtn');
+const undoBtn = document.getElementById('undoBtn');
+const contractionsEl = document.getElementById('contractions');
+const shortenEl = document.getElementById('shorten');
+const strength = document.getElementById('strength');
+const strengthLabel = document.getElementById('strengthLabel');
 
-  let lastOutput = '';
-  let lastInput = inputEl.value;
+let lastOutput = '';
+let lastInput = '';
 
-  strength.addEventListener('input', ()=>{ strengthLabel.textContent = strength.value; });
+strength.addEventListener('input', ()=> strengthLabel.textContent = strength.value);
 
-  btn.addEventListener('click', ()=>{
-    const options = {
-      tone: toneEl.value,
-      variability: varEl.value,
-      contractions: document.getElementById('contractions').checked,
-      shorten: document.getElementById('shorten').checked,
-      strength: parseFloat(strength.value)
-    };
-    // seed optionally from the current time — reproducible for this run
-    humaniser.seed(Math.floor(Date.now() % 2147483647));
-    lastOutput = outEl.textContent;
-    lastInput = inputEl.value;
-    const result = humaniser.humanise(inputEl.value, options);
-    outEl.textContent = result;
-    outEl.focus();
-  });
+btn.addEventListener('click', ()=>{
+  const options = {
+    tone: toneEl.value,
+    variability: varEl.value,
+    contractions: contractionsEl.checked,
+    shorten: shortenEl.checked,
+    strength: parseFloat(strength.value),
+    lang: langEl.value
+  };
 
-  copyBtn.addEventListener('click', async ()=>{
-    try{
-      const text = outEl.innerText || outEl.textContent;
-      await navigator.clipboard.writeText(text);
-      copyBtn.textContent = 'Copied!';
-      setTimeout(()=>copyBtn.textContent = 'Copy output',1500);
-    }catch(e){
-      copyBtn.textContent = 'Copy failed';
-      setTimeout(()=>copyBtn.textContent = 'Copy output',1500);
-    }
-  });
-
-  clearBtn.addEventListener('click', ()=>{ outEl.textContent=''; });
-  exampleBtn.addEventListener('click', ()=>{
-    inputEl.value = 'Our team evaluated the prototype. The implementation was performed by the external vendor. Users do not always prefer the default settings; therefore it is recommended to provide customization options.';
-  });
-  undoBtn.addEventListener('click', ()=>{
-    outEl.textContent = lastOutput || '';
-  });
-
-  // initial population
+  // seed per run for reproducible behaviour during this session
   humaniser.seed(Math.floor(Date.now() % 2147483647));
-  outEl.textContent = humaniser.humanise(inputEl.value, {tone:'casual',variability:'medium',contractions:true,shorten:true,strength:0.6});
+  lastOutput = outEl.textContent;
+  lastInput = inputEl.value;
+  const result = humaniser.humanise(inputEl.value, options);
+  outEl.textContent = result;
+  outEl.focus();
+});
+
+copyBtn.addEventListener('click', async ()=>{
+  try{
+    const text = outEl.innerText || outEl.textContent;
+    await navigator.clipboard.writeText(text);
+    copyBtn.textContent = 'Copied!';
+    setTimeout(()=>copyBtn.textContent = 'Copy output',1400);
+  }catch(e){
+    copyBtn.textContent = 'Copy failed';
+    setTimeout(()=>copyBtn.textContent = 'Copy output',1400);
+  }
+});
+
+clearBtn.addEventListener('click', ()=> outEl.textContent = '');
+exampleBtn.addEventListener('click', ()=> {
+  inputEl.value = "Our testing team reviewed the build and recommended follow-up work. It was deployed by an external partner. Not all users prefer the default settings; offer customization.\n\nOns testteam heeft het bouwsel nagekeken en vervolgwerk aanbevolen. Het werd uitgerold door een externe partner. Niet alle gebruikers geven de voorkeur aan de standaardinstellingen; bied aanpassingen aan.";
+});
+undoBtn.addEventListener('click', ()=> outEl.textContent = lastOutput || '');
+
+// initial render
+humaniser.seed(Math.floor(Date.now() % 2147483647));
+outEl.textContent = humaniser.humanise(inputEl.value, {tone:'casual',variability:'medium',contractions:true,shorten:true,strength:0.7,lang:'auto'});
 </script>
 </body>
 </html>
